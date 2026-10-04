@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTE - Crítica Tu Escuela | Panamá</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .modal-blur { backdrop-filter: blur(12px); }
+        #toastNotice { transition: transform 0.3s ease, opacity 0.3s ease; }
+    </style>
+</head>
+<body class="h-full font-sans antialiased bg-slate-950 text-slate-100 flex flex-col justify-between overflow-x-hidden">
+
+    <div id="app" class="min-h-screen flex flex-col max-w-7xl mx-auto w-full relative pb-16 md:pb-0">
+
+        <!-- HEADER -->
+        <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-2.5 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="navTo('feed')">
+                <div class="bg-white px-2.5 py-1 rounded-xl shadow-md border border-slate-200 flex flex-col items-center justify-center">
+                    <span class="font-black text-slate-950 tracking-tighter text-lg leading-none font-sans">CTE</span>
+                    <span class="text-[7px] font-extrabold text-slate-900 uppercase tracking-widest border-t border-slate-950 pt-0.5 mt-0.5 w-full text-center">Critica Tu Escuela</span>
+                </div>
+                <div>
+                    <h1 class="font-black tracking-tight text-base sm:text-lg leading-tight text-white flex items-center gap-2">
+                        CTE <span class="bg-red-500/20 text-red-400 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold border border-red-500/30">Panamá 🇵🇦</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Voz libre y denuncias estudiantiles</p>
+                </div>
+            </div>
+
+            <!-- Header Auth & Profile Controls -->
+            <div class="flex items-center gap-2">
+                <div id="userHeaderProfile" class="hidden flex items-center gap-2">
+                    <button onclick="navTo('profile')" class="flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 p-1.5 pr-3 rounded-full border border-slate-700/60 transition">
+                        <img id="headerAvatar" src="https://placehold.co/100x100/1e293b/94a3b8?text=Estudiante" class="w-8 h-8 rounded-full object-cover border border-emerald-500">
+                        <div class="text-left hidden md:block">
+                            <p id="headerName" class="text-xs font-semibold text-slate-200">Estudiante</p>
+                            <p id="headerSchool" class="text-[10px] text-slate-400 truncate max-w-[120px]">Escuela</p>
+                        </div>
+                    </button>
+                    <button onclick="handleLogout()" class="p-2 text-slate-400 hover:text-red-400 text-sm transition" title="Cerrar Sesión">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+
+                <div id="authHeaderButtons" class="flex items-center gap-2">
+                    <button onclick="openAuthModal('login')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition">
+                        Iniciar Sesión
+                    </button>
+                    <button onclick="openAuthModal('register')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-600/30 transition">
+                        Registrarse
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div id="toastNotice" class="fixed top-16 right-4 z-50 transform translate-y-[-100px] opacity-0 bg-slate-800 border border-emerald-500 text-slate-100 text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 pointer-events-none">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+            <span id="toastText">Acción realizada con éxito</span>
+        </div>
+
+        <!-- MAIN LAYOUT -->
+        <div class="flex-1 flex w-full">
+
+            <aside class="hidden md:flex flex-col w-64 p-4 border-r border-slate-800 gap-2 sticky top-16 h-[calc(100vh-4rem)]">
+                <button onclick="navTo('feed')" id="nav-feed" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-slate-300 hover:bg-slate-800/60 hover:text-white transition active-nav">
+                    <i class="fa-solid fa-house text-lg w-6 text-emerald-400"></i> Para Ti
+                </button>
+                <button onclick="navTo('create')" id="nav-create" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-slate-300 hover:bg-slate-800/60 hover:text-white transition">
+                    <i class="fa-solid fa-pen-to-square text-lg w-6 text-blue-400"></i> Nueva Denuncia
+                </button>
+                <button onclick="navTo('messages')" id="nav-messages" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-slate-300 hover:bg-slate-800/60 hover:text-white transition relative">
+                    <i class="fa-solid fa-paper-plane text-lg w-6 text-purple-400"></i> Amigos y Chat
+                    <span id="pendingBadgeNav" class="hidden ml-auto bg-amber-500 text-slate-950 font-extrabold text-[10px] px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+                <button onclick="navTo('profile')" id="nav-profile" class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-slate-300 hover:bg-slate-800/60 hover:text-white transition">
+                    <i class="fa-solid fa-user text-lg w-6 text-amber-400"></i> Mi Perfil
+                </button>
+
+                <div class="mt-auto p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-800">
+                    <div class="flex items-center gap-2 text-emerald-400 font-semibold text-xs mb-1">
+                        <i class="fa-solid fa-shield-halved"></i> Espacio Seguro CTE
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">Tu correo electrónico es 100% privado y nunca será visible para el público u otros estudiantes.</p>
+                </div>
+            </aside>
+
+            <main class="flex-1 min-w-0 border-r border-slate-800/60 pb-12">
+
+                <!-- VIEW: FEED -->
+                <section id="view-feed" class="view-section">
+                    <div class="p-4 border-b border-slate-800/80 bg-slate-900/40">
+                        <div class="flex gap-3 items-center">
+                            <img id="feedQuickAvatar" src="https://placehold.co/100x100/1e293b/94a3b8?text=Estudiante" class="w-10 h-10 rounded-full object-cover border border-slate-700">
+                            <button onclick="navTo('create')" class="flex-1 bg-slate-800/80 hover:bg-slate-800 text-left px-4 py-2.5 rounded-full text-slate-400 text-sm border border-slate-700/50 transition">
+                                ¿Qué sucede en tu colegio? Denuncia o exprésate aquí...
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Category Filters -->
+                    <div class="flex gap-2 p-3 overflow-x-auto border-b border-slate-800/60 no-scrollbar text-xs">
+                        <button onclick="filterPosts('todos', event)" class="filter-btn active-filter px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium border border-emerald-500/40 whitespace-nowrap">Todas las opiniones</button>
+                        <button onclick="filterPosts('instalaciones', event)" class="filter-btn px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 whitespace-nowrap">🏫 Instalaciones en Mal Estado</button>
+                        <button onclick="filterPosts('profesores', event)" class="filter-btn px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 whitespace-nowrap">👨‍🏫 Quejas de Profesores/Alumnos</button>
+                        <button onclick="filterPosts('eventos', event)" class="filter-btn px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 whitespace-nowrap">🎉 Acontecimientos Estudiantiles</button>
+                    </div>
+
+                    <!-- Posts Container -->
+                    <div id="postsList" class="divide-y divide-slate-800/60">
+                        <div id="emptyFeedMessage" class="py-16 px-4 text-center">
+                            <div class="w-16 h-16 bg-slate-800/80 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500 text-2xl">
+                                <i class="fa-solid fa-bullhorn"></i>
+                            </div>
+                            <h3 class="text-base font-semibold text-slate-200 mb-1">Aún no hay publicaciones</h3>
+                            <p class="text-sm text-slate-400 max-w-sm mx-auto mb-6">Sé el primer estudiante en publicar lo que pasa en tu colegio.</p>
+                            <button onclick="navTo('create')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-medium text-sm transition shadow-lg shadow-emerald-600/30">
+                                <i class="fa-solid fa-plus mr-1.5"></i> Crear Publicación
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: CREATE POST -->
+                <section id="view-create" class="view-section hidden p-4 max-w-2xl mx-auto">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane text-emerald-400"></i> Nueva Expresión / Denuncia
+                        </h2>
+                        <button onclick="navTo('feed')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+
+                    <form id="createPostForm" onsubmit="handleCreatePost(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Categoría del acontecimiento</label>
+                            <select id="postCategory" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                                <option value="instalaciones">🏫 Instalaciones en Mal Estado (Aulas, Baños, Gimnasio)</option>
+                                <option value="profesores">👨‍🏫 Quejas sobre Profesores o Dirección</option>
+                                <option value="alumnos">🎒 Situaciones con Alumnos / Convivencia</option>
+                                <option value="eventos">🎉 Acontecimientos / Deportes / Actividades</option>
+                                <option value="general">🗣️ Expresión Libre Estudiantil</option>
+                            </select>
+                        </div>
+
+                        <!-- Anonymity Toggle -->
+                        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div id="anonIcon" class="w-9 h-9 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <div>
+                                    <p id="anonTitle" class="text-sm font-semibold text-slate-200">Publicar con mi nombre</p>
+                                    <p id="anonDesc" class="text-xs text-slate-400">Tu nombre y colegio serán visibles públicamente</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="isAnonymousToggle" class="sr-only peer" onchange="toggleAnonMode(this.checked)">
+                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                        </div>
+
+                        <div>
+                            <textarea id="postContent" required rows="4" placeholder="Escribe aquí los detalles de la denuncia o tu punto de vista..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 resize-none"></textarea>
+                        </div>
+
+                        <!-- Local Gallery Upload -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Adjuntar Foto o Video (Galería Personal)</label>
+                            <div class="border-2 border-dashed border-slate-800 hover:border-slate-700 rounded-xl p-4 text-center bg-slate-900/50 cursor-pointer relative" onclick="document.getElementById('postMediaInput').click()">
+                                <input type="file" id="postMediaInput" accept="image/*,video/*" class="hidden" onchange="previewMediaUpload(this)">
+                                <div id="mediaPlaceholder">
+                                    <i class="fa-solid fa-photo-film text-3xl text-emerald-500/70 mb-2"></i>
+                                    <p class="text-xs text-slate-300 font-medium">Seleccionar imagen o video de tu galería personal</p>
+                                    <p class="text-[10px] text-slate-500 mt-1">Soporta imágenes (PNG, JPG) y videos (MP4, MOV)</p>
+                                </div>
+                                <div id="mediaPreviewContainer" class="hidden relative max-h-64 overflow-hidden rounded-lg">
+                                    <img id="imagePreview" class="hidden w-full h-auto max-h-56 object-cover rounded-lg">
+                                    <video id="videoPreview" controls class="hidden w-full h-auto max-h-56 rounded-lg"></video>
+                                    <button type="button" onclick="event.stopPropagation(); removeMediaPreview();" class="absolute top-2 right-2 bg-slate-900/80 hover:bg-red-600 text-white w-7 h-7 rounded-full text-xs transition">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-sm transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> Publicar en CTE
+                        </button>
+                    </form>
+                </section>
+
+                <!-- VIEW: MESSAGES & FRIENDS -->
+                <section id="view-messages" class="view-section hidden flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
+                    <div class="flex border-b border-slate-800 bg-slate-900/60 text-xs font-semibold">
+                        <button onclick="switchMsgTab('chats')" id="msg-tab-chats" class="flex-1 py-3 text-center text-emerald-400 border-b-2 border-emerald-500 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-comments"></i> Amigos
+                        </button>
+                        <button onclick="switchMsgTab('search')" id="msg-tab-search" class="flex-1 py-3 text-center text-slate-400 border-b-2 border-transparent hover:text-slate-200 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-user-plus"></i> Buscar Alumnos
+                        </button>
+                        <button onclick="switchMsgTab('requests')" id="msg-tab-requests" class="flex-1 py-3 text-center text-slate-400 border-b-2 border-transparent hover:text-slate-200 flex items-center justify-center gap-2 relative">
+                            <i class="fa-solid fa-bell"></i> Solicitudes
+                            <span id="pendingBadgeTab" class="hidden bg-amber-500 text-slate-950 font-extrabold text-[9px] px-1.5 py-0.2 rounded-full">0</span>
+                        </button>
+                    </div>
+
+                    <div id="subview-chats" class="flex-1 grid grid-cols-1 md:grid-cols-3 h-full overflow-hidden">
+                        <div class="border-r border-slate-800 p-3 flex flex-col bg-slate-900/30 overflow-y-auto">
+                            <h2 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3 px-1">Tus Contactos</h2>
+                            <div id="acceptedFriendsList" class="space-y-1"></div>
+                        </div>
+
+                        <div id="chatArea" class="col-span-2 flex flex-col h-full bg-slate-950 border-t md:border-t-0 border-slate-800">
+                            <div id="chatHeader" class="p-3 bg-slate-900 border-b border-slate-800 flex items-center gap-3">
+                                <img id="chatPartnerAvatar" src="https://placehold.co/100x100/1e293b/94a3b8?text=Estudiante" class="w-9 h-9 rounded-full object-cover">
+                                <div>
+                                    <h3 id="chatPartnerName" class="font-semibold text-sm text-slate-100">Selecciona un compañero</h3>
+                                    <p id="chatPartnerSchool" class="text-xs text-slate-400">Mensajería privada estudiantil</p>
+                                </div>
+                            </div>
+
+                            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-950/60">
+                                <div class="text-center py-12 text-slate-500 text-xs">
+                                    <i class="fa-regular fa-paper-plane text-3xl mb-2 text-slate-600 block"></i>
+                                    Selecciona un estudiante para iniciar conversación
+                                </div>
+                            </div>
+
+                            <form id="dmForm" onsubmit="sendDirectMessage(event)" class="p-3 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
+                                <input type="file" id="dmMediaInput" accept="image/*" class="hidden" onchange="handleDmImageSelect(this)">
+                                <button type="button" onclick="document.getElementById('dmMediaInput').click()" class="p-2 text-slate-400 hover:text-emerald-400 transition" title="Adjuntar foto de la galería">
+                                    <i class="fa-solid fa-image text-lg"></i>
+                                </button>
+                                <div id="dmImagePreviewBadge" class="hidden text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-1 rounded flex items-center gap-1">
+                                    <span>Foto adjunta</span>
+                                    <button type="button" onclick="clearDmImagePreview()"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                                <input type="text" id="dmInputText" placeholder="Escribe un mensaje..." class="flex-1 bg-slate-950 border border-slate-800 rounded-full px-4 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                                <button type="submit" class="w-9 h-9 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center transition shadow-md shadow-emerald-600/30">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="subview-search" class="hidden flex-1 p-4 overflow-y-auto max-w-2xl mx-auto w-full">
+                        <div class="mb-4">
+                            <label class="block text-xs font-semibold text-slate-400 mb-2 uppercase">Buscar estudiantes en colegios de Panamá</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-sm"></i>
+                                <input type="text" id="studentSearchInput" oninput="filterSearchStudents()" placeholder="Busca por nombre o colegio..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                            </div>
+                        </div>
+                        <div id="searchResultList" class="space-y-2"></div>
+                    </div>
+
+                    <div id="subview-requests" class="hidden flex-1 p-4 overflow-y-auto max-w-2xl mx-auto w-full">
+                        <h3 class="font-bold text-sm text-slate-200 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-user-clock text-amber-400"></i> Solicitudes Recibidas
+                        </h3>
+                        <div id="pendingRequestsContainer" class="space-y-2"></div>
+                    </div>
+                </section>
+
+                <!-- VIEW: PROFILE -->
+                <section id="view-profile" class="view-section hidden p-4 max-w-3xl mx-auto">
+                    <div class="bg-gradient-to-br from-slate-900 to-slate-900/80 rounded-2xl p-6 border border-slate-800 shadow-xl mb-6 relative overflow-hidden">
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left relative z-10">
+                            <div class="relative group cursor-pointer" onclick="triggerProfilePictureUpload()">
+                                <img id="profilePageAvatar" src="https://placehold.co/100x100/1e293b/94a3b8?text=Estudiante" class="w-20 h-20 rounded-2xl object-cover border-2 border-emerald-500 shadow-lg">
+                                <div class="absolute inset-0 bg-slate-950/60 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[10px] font-semibold text-white">
+                                    Cambiar Foto
+                                </div>
+                                <input type="file" id="profileImageFileInput" accept="image/*" class="hidden" onchange="handleProfilePictureChange(this)">
+                            </div>
+                            <div class="flex-1">
+                                <h2 id="profilePageName" class="text-xl font-extrabold text-white">Estudiante CTE</h2>
+                                <p id="profilePageSchool" class="text-sm font-medium text-emerald-400 mt-1"><i class="fa-solid fa-school text-xs mr-1"></i> Colegio Panamá</p>
+                                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+                                    <span class="bg-slate-800 text-slate-300 text-[11px] px-2.5 py-1 rounded-full border border-slate-700">Verificado (+15 Años)</span>
+                                    <span class="bg-emerald-950 text-emerald-400 text-[11px] px-2.5 py-1 rounded-full border border-emerald-800/80 flex items-center gap-1">
+                                        <i class="fa-solid fa-lock text-[9px]"></i> Correo Privado Oculto
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex border-b border-slate-800 mb-4 gap-2">
+                        <button onclick="switchProfileTab('posts')" id="tab-btn-posts" class="prof-tab active-tab pb-3 px-4 text-sm font-semibold text-emerald-400 border-b-2 border-emerald-500">
+                            Mis Publicaciones
+                        </button>
+                        <button onclick="switchProfileTab('shares')" id="tab-btn-shares" class="prof-tab pb-3 px-4 text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200">
+                            Compartidos
+                        </button>
+                        <button onclick="switchProfileTab('anon')" id="tab-btn-anon" class="prof-tab pb-3 px-4 text-sm font-semibold text-amber-400 border-b-2 border-transparent hover:text-amber-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-lock text-xs"></i> Mis Denuncias Anónimas
+                        </button>
+                    </div>
+
+                    <div id="profileTabContent">
+                        <div id="profilePostsContainer" class="space-y-3"></div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- RIGHT SIDEBAR -->
+            <aside class="hidden lg:block w-80 p-4 sticky top-16 h-[calc(100vh-4rem)] space-y-4">
+                <div class="bg-slate-900/60 rounded-2xl p-4 border border-slate-800/80">
+                    <h3 class="font-bold text-sm text-slate-200 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-amber-400"></i> Tendencias en Panamá
+                    </h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer transition">
+                            <p class="text-slate-500 font-medium">Panamá Centro • Instalaciones</p>
+                            <p class="font-semibold text-slate-200">#ReparaciónDeAulas</p>
+                            <p class="text-slate-400 text-[10px]">Alumnos reportando deterioro</p>
+                        </div>
+                        <div class="p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer transition">
+                            <p class="text-slate-500 font-medium">Chiriquí • Acontecimientos</p>
+                            <p class="font-semibold text-slate-200">#LigaEstudiantil2026</p>
+                            <p class="text-slate-400 text-[10px]">Resultados intercolegiales</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+
+        <!-- MOBILE NAVIGATION BAR -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex justify-around p-2 z-40">
+            <button onclick="navTo('feed')" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-emerald-400 text-xs font-medium">
+                <i class="fa-solid fa-house text-lg"></i> Para Ti
+            </button>
+            <button onclick="navTo('create')" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-emerald-400 text-xs font-medium">
+                <i class="fa-solid fa-pen-to-square text-lg"></i> Denuncia
+            </button>
+            <button onclick="navTo('messages')" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-emerald-400 text-xs font-medium">
+                <i class="fa-solid fa-paper-plane text-lg"></i> Mensajes
+            </button>
+            <button onclick="navTo('profile')" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-emerald-400 text-xs font-medium">
+                <i class="fa-solid fa-user text-lg"></i> Perfil
+            </button>
+        </nav>
+
+
+        <!-- MODAL 1: AGE GATE (+15 Verification) -->
+        <div id="ageGateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 modal-blur">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl text-center space-y-5">
+                <div class="bg-white px-4 py-2 rounded-2xl border border-slate-200 inline-flex flex-col items-center justify-center shadow-lg mx-auto">
+                    <span class="font-black text-slate-950 tracking-tighter text-2xl leading-none">CTE</span>
+                    <span class="text-[8px] font-extrabold text-slate-900 uppercase tracking-widest border-t border-slate-950 pt-0.5 mt-0.5 w-full text-center">Critica Tu Escuela</span>
+                </div>
+                <div>
+                    <h2 class="text-xl font-extrabold text-white">Verificación de Edad</h2>
+                    <p class="text-xs text-emerald-400 font-semibold mt-0.5">Plataforma Estudiantil Panamá</p>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                    Bienvenido a CTE. Para ingresar debes ser estudiante de colegio en Panamá y confirmar que tienes 15 años o más.
+                </p>
+                <div class="space-y-2 pt-2">
+                    <button onclick="confirmAge(true)" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-600/30">
+                        Sí, tengo 15 años o más
+                    </button>
+                    <button onclick="confirmAge(false)" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 font-medium rounded-xl text-xs transition">
+                        Soy menor de 15 años
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 2: USER AUTHENTICATION (LOGIN / REGISTER) -->
+        <div id="authModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/90 modal-blur">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <div class="bg-white px-2 py-0.5 rounded-lg border border-slate-200">
+                        <span class="font-black text-slate-950 tracking-tighter text-xs">CTE</span>
+                    </div>
+                    <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+
+                <div class="text-center">
+                    <h2 id="authModalTitle" class="text-xl font-bold text-white">Iniciar Sesión</h2>
+                    <p id="authModalSubtitle" class="text-xs text-slate-400">Tu correo electrónico siempre permanecerá oculto</p>
+                </div>
+
+                <!-- Form Mode Selector -->
+                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+                    <button id="authTabLogin" onclick="toggleAuthTab('login')" class="flex-1 py-2 text-center text-emerald-400 bg-slate-900 rounded-lg">Iniciar Sesión</button>
+                    <button id="authTabRegister" onclick="toggleAuthTab('register')" class="flex-1 py-2 text-center text-slate-400">Crear Cuenta</button>
+                </div>
+
+                <!-- Error Message Box -->
+                <div id="authErrorMsg" class="hidden p-3 bg-red-950/60 border border-red-800 text-red-200 text-xs rounded-xl text-center"></div>
+
+                <!-- LOGIN FORM -->
+                <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Correo Electrónico (Privado)</label>
+                        <input type="email" id="loginEmail" required placeholder="tu.correo@estudiante.pa" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Contraseña</label>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-emerald-600/30">
+                        Entrar a mi Cuenta
+                    </button>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="registerForm" onsubmit="handleRegisterSubmit(event)" class="space-y-3 hidden">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="relative group cursor-pointer" onclick="document.getElementById('onboardAvatarInput').click()">
+                            <img id="onboardAvatarPreview" src="https://placehold.co/100x100/1e293b/94a3b8?text=Foto" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-500 shadow-md">
+                            <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-[10px] text-white opacity-0 group-hover:opacity-100 transition">
+                                Galería
+                            </div>
+                        </div>
+                        <input type="file" id="onboardAvatarInput" accept="image/*" class="hidden" onchange="previewOnboardAvatar(this)">
+                        <p class="text-[10px] text-slate-400">Selecciona foto de perfil</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Nombre Completo (Público)</label>
+                        <input type="text" id="regName" required placeholder="Ej. Gabriel Morales" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Colegio en Panamá</label>
+                        <input type="text" id="regSchool" list="panamaSchoolsList" required placeholder="Selecciona o escribe tu colegio" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                        <datalist id="panamaSchoolsList">
+                            <option value="Instituto Nacional de Panamá"></option>
+                            <option value="Colegio José Daniel Crespo"></option>
+                            <option value="Escuela Normal Juan Demóstenes Arosemena"></option>
+                            <option value="Colegio Pedro Pablo Sánchez"></option>
+                            <option value="Instituto La Salle"></option>
+                            <option value="Colegio San Agustín"></option>
+                            <option value="Instituto Dr. Alfredo Cantón"></option>
+                            <option value="Colegio Félix Olivares Contreras"></option>
+                            <option value="Colegio Moisés Castillo Ocaña"></option>
+                            <option value="Instituto América"></option>
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Correo Electrónico (Permanecerá Oculto)</label>
+                        <input type="email" id="regEmail" required placeholder="correo@estudiante.pa" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Crear Contraseña</label>
+                        <input type="password" id="regPassword" required minlength="4" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-emerald-600/30">
+                        Registrar Cuenta Estudiantil
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* AUTH DATABASE & LOCAL STORAGE SYSTEM */
+        const AuthDatabase = {
+            DB_KEY: 'cte_users_db',
+            SESSION_KEY: 'cte_current_user',
+
+            getUsers() {
+                try {
+                    const data = localStorage.getItem(this.DB_KEY);
+                    return data ? JSON.parse(data) : {};
+                } catch(e) {
+                    console.error("Error leyendo base de datos", e);
+                    return {};
+                }
+            },
+
+            saveUsers(users) {
+                localStorage.setItem(this.DB_KEY, JSON.stringify(users));
+            },
+
+            registerUser(email, password, name, school, avatar) {
+                const users = this.getUsers();
+                const normalizedEmail = email.toLowerCase().trim();
+
+                if (users[normalizedEmail]) {
+                    return { success: false, message: "Este correo electrónico ya está registrado. Por favor inicia sesión." };
+                }
+
+                const newUser = {
+                    id: 'u_' + Date.now(),
+                    email: normalizedEmail,
+                    password: password,
+                    name: name,
+                    school: school,
+                    avatar: avatar || `https://placehold.co/100x100/10b981/ffffff?text=${encodeURIComponent(name.charAt(0))}`,
+                    registeredAt: new Date().toISOString()
+                };
+
+                users[normalizedEmail] = newUser;
+                this.saveUsers(users);
+                this.setCurrentSession(newUser);
+                return { success: true, user: newUser };
+            },
+
+            loginUser(email, password) {
+                const users = this.getUsers();
+                const normalizedEmail = email.toLowerCase().trim();
+
+                if (!users[normalizedEmail]) {
+                    return { success: false, message: "No existe ninguna cuenta con este correo electrónico." };
+                }
+
+                if (users[normalizedEmail].password !== password) {
+                    return { success: false, message: "La contraseña ingresada es incorrecta." };
+                }
+
+                const user = users[normalizedEmail];
+                this.setCurrentSession(user);
+                return { success: true, user: user };
+            },
+
+            getCurrentSession() {
+                try {
+                    const data = localStorage.getItem(this.SESSION_KEY);
+                    return data ? JSON.parse(data) : null;
+                } catch(e) {
+                    return null;
+                }
+            },
+
+            setCurrentSession(user) {
+                localStorage.setItem(this.SESSION_KEY, JSON.stringify(user));
+            },
+
+            logoutSession() {
+                localStorage.removeItem(this.SESSION_KEY);
+            }
+        };
+
+        /* GLOBAL STATE */
+        let currentUser = null;
+        let posts = [];
+        let directMessages = {};
+        let currentChatPartner = null;
+        let selectedDmImage = null;
+        let activeProfileTab = 'posts';
+        let currentFilter = 'todos';
+        let newPostMediaData = null;
+        let tempRegisterAvatar = null;
+
+        let studentDirectory = [
+            { id: "s1", name: "Mariana Ríos", school: "Instituto Nacional", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80", friendStatus: "requested" },
+            { id: "s2", name: "Diego Peralta", school: "Colegio Pedro Pablo Sánchez", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80", friendStatus: "none" },
+            { id: "s3", name: "Sofia Morales", school: "Colegio José Daniel Crespo", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80", friendStatus: "none" },
+            { id: "s4", name: "Gabriel Castillo", school: "Instituto La Salle", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80", friendStatus: "none" }
+        ];
+
+        window.onload = function() {
+            currentUser = AuthDatabase.getCurrentSession();
+
+            // Load persistent storage
+            const storedPosts = localStorage.getItem('cte_posts_db');
+            if (storedPosts) posts = JSON.parse(storedPosts);
+
+            const storedDms = localStorage.getItem('cte_dms_db');
+            if (storedDms) directMessages = JSON.parse(storedDms);
+
+            if (currentUser) {
+                document.getElementById('ageGateModal').classList.add('hidden');
+                updateUserProfileUI();
+            } else {
+                updateAuthHeaderUI();
+            }
+
+            renderPosts();
+            renderFriendsAndSearch();
+            updatePendingBadges();
+        };
+
+        /* SYSTEM TOAST */
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toastNotice');
+            const text = document.getElementById('toastText');
+            const icon = document.getElementById('toastIcon');
+
+            text.innerText = msg;
+            if (isError) {
+                toast.className = toast.className.replace('border-emerald-500', 'border-red-500');
+                icon.className = "fa-solid fa-circle-exclamation text-red-400 text-sm";
+            } else {
+                toast.className = toast.className.replace('border-red-500', 'border-emerald-500');
+                icon.className = "fa-solid fa-circle-check text-emerald-400 text-sm";
+            }
+
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-100px]', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 2500);
+        }
+
+        /* AGE GATE HANDLER */
+        function confirmAge(isAllowed) {
+            if (isAllowed) {
+                document.getElementById('ageGateModal').classList.add('hidden');
+                if (!currentUser) openAuthModal('register');
+            } else {
+                alert("CTE es una plataforma exclusivamente para estudiantes mayores de 15 años.");
+            }
+        }
+
+        /* AUTH MODAL HANDLERS */
+        function openAuthModal(mode) {
+            hideAuthError();
+            document.getElementById('authModal').classList.remove('hidden');
+            toggleAuthTab(mode);
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function showAuthError(msg) {
+            const box = document.getElementById('authErrorMsg');
+            box.innerText = msg;
+            box.classList.remove('hidden');
+        }
+
+        function hideAuthError() {
+            document.getElementById('authErrorMsg').classList.add('hidden');
+        }
+
+        function toggleAuthTab(mode) {
+            hideAuthError();
+            const loginTab = document.getElementById('authTabLogin');
+            const regTab = document.getElementById('authTabRegister');
+            const loginForm = document.getElementById('loginForm');
+            const regForm = document.getElementById('registerForm');
+            const title = document.getElementById('authModalTitle');
+
+            if (mode === 'login') {
+                loginTab.className = "flex-1 py-2 text-center text-emerald-400 bg-slate-900 rounded-lg font-semibold";
+                regTab.className = "flex-1 py-2 text-center text-slate-400 font-semibold";
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                title.innerText = "Iniciar Sesión";
+            } else {
+                regTab.className = "flex-1 py-2 text-center text-emerald-400 bg-slate-900 rounded-lg font-semibold";
+                loginTab.className = "flex-1 py-2 text-center text-slate-400 font-semibold";
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                title.innerText = "Crear Cuenta Estudiantil";
+            }
+        }
+
+        function previewOnboardAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('onboardAvatarPreview').src = e.target.result;
+                    tempRegisterAvatar = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function handleRegisterSubmit(e) {
+            e.preventDefault();
+            hideAuthError();
+
+            const name = document.getElementById('regName').value.trim();
+            const school = document.getElementById('regSchool').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            const res = AuthDatabase.registerUser(email, password, name, school, tempRegisterAvatar);
+            if (!res.success) {
+                showAuthError(res.message);
+                return;
+            }
+
+            currentUser = res.user;
+            updateUserProfileUI();
+            closeAuthModal();
+            showToast("¡Cuenta registrada con éxito!");
+            renderPosts();
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            hideAuthError();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            const res = AuthDatabase.loginUser(email, password);
+            if (!res.success) {
+                showAuthError(res.message);
+                return;
+            }
+
+            currentUser = res.user;
+            updateUserProfileUI();
+            closeAuthModal();
+            showToast(`¡Bienvenido de vuelta, ${currentUser.name}!`);
+            renderPosts();
+        }
+
+        function handleLogout() {
+            AuthDatabase.logoutSession();
+            currentUser = null;
+            updateAuthHeaderUI();
+            showToast("Has cerrado sesión");
+            navTo('feed');
+        }
+
+        function updateAuthHeaderUI() {
+            const profileArea = document.getElementById('userHeaderProfile');
+            const authBtns = document.getElementById('authHeaderButtons');
+
+            if (currentUser) {
+                profileArea.classList.remove('hidden');
+                authBtns.classList.add('hidden');
+            } else {
+                profileArea.classList.add('hidden');
+                authBtns.classList.remove('hidden');
+            }
+        }
+
+        function updateUserProfileUI() {
+            updateAuthHeaderUI();
+            if (!currentUser) return;
+
+            document.getElementById('headerAvatar').src = currentUser.avatar;
+            document.getElementById('headerName').innerText = currentUser.name;
+            document.getElementById('headerSchool').innerText = currentUser.school;
+            document.getElementById('feedQuickAvatar').src = currentUser.avatar;
+
+            document.getElementById('profilePageAvatar').src = currentUser.avatar;
+            document.getElementById('profilePageName').innerText = currentUser.name;
+            document.getElementById('profilePageSchool').innerHTML = `<i class="fa-solid fa-school text-xs mr-1"></i> ${currentUser.school}`;
+        }
+
+        /* NAVIGATION CONTROL */
+        function navTo(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`view-${viewName}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('aside button').forEach(btn => btn.classList.remove('active-nav', 'bg-slate-800', 'text-white'));
+            const activeDesktopBtn = document.getElementById(`nav-${viewName}`);
+            if (activeDesktopBtn) activeDesktopBtn.classList.add('active-nav', 'bg-slate-800', 'text-white');
+
+            if (viewName === 'feed') renderPosts();
+            if (viewName === 'profile') renderProfileTab();
+            if (viewName === 'messages') renderFriendsAndSearch();
+        }
+
+        function switchMsgTab(tab) {
+            document.getElementById('subview-chats').classList.add('hidden');
+            document.getElementById('subview-search').classList.add('hidden');
+            document.getElementById('subview-requests').classList.add('hidden');
+
+            document.getElementById('msg-tab-chats').classList.remove('text-emerald-400', 'border-emerald-500');
+            document.getElementById('msg-tab-search').classList.remove('text-emerald-400', 'border-emerald-500');
+            document.getElementById('msg-tab-requests').classList.remove('text-emerald-400', 'border-emerald-500');
+
+            document.getElementById(`subview-${tab}`).classList.remove('hidden');
+            document.getElementById(`msg-tab-${tab}`).classList.add('text-emerald-400', 'border-emerald-500');
+
+            renderFriendsAndSearch();
+        }
+
+        function renderFriendsAndSearch() {
+            renderAcceptedFriends();
+            filterSearchStudents();
+            renderPendingRequests();
+            updatePendingBadges();
+        }
+
+        function renderAcceptedFriends() {
+            const container = document.getElementById('acceptedFriendsList');
+            const friends = studentDirectory.filter(s => s.friendStatus === 'accepted');
+
+            if (friends.length === 0) {
+                container.innerHTML = `<p class="text-[11px] text-slate-500 p-2">Aún no tienes contactos agregados. Usa "Buscar Alumnos" para añadir amigos.</p>`;
+                return;
+            }
+
+            container.innerHTML = friends.map(student => `
+                <div onclick="selectChatPartner('${student.name}', '${student.school}', '${student.avatar}')" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-800/80 cursor-pointer transition border border-transparent hover:border-slate-700">
+                    <img src="${student.avatar}" class="w-8 h-8 rounded-full object-cover">
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-semibold text-slate-200 truncate">${student.name}</p>
+                        <p class="text-[10px] text-slate-400 truncate">${student.school}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterSearchStudents() {
+            const input = document.getElementById('studentSearchInput');
+            const term = input ? input.value.toLowerCase().trim() : '';
+            const container = document.getElementById('searchResultList');
+
+            const matched = studentDirectory.filter(s => 
+                s.name.toLowerCase().includes(term) || s.school.toLowerCase().includes(term)
+            );
+
+            if (matched.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 py-6 text-center">No se encontraron estudiantes.</p>`;
+                return;
+            }
+
+            container.innerHTML = matched.map(s => {
+                let actionBtn = '';
+                if (s.friendStatus === 'accepted') {
+                    actionBtn = `<span class="text-xs text-emerald-400 font-semibold px-3 py-1 bg-emerald-950 border border-emerald-800 rounded-full"><i class="fa-solid fa-check mr-1"></i> Amigos</span>`;
+                } else if (s.friendStatus === 'sent') {
+                    actionBtn = `<span class="text-xs text-slate-400 font-medium px-3 py-1 bg-slate-800 rounded-full"><i class="fa-solid fa-clock mr-1"></i> Enviada</span>`;
+                } else if (s.friendStatus === 'requested') {
+                    actionBtn = `<button onclick="acceptFriendRequest('${s.id}')" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3 py-1 rounded-full transition">Aceptar</button>`;
+                } else {
+                    actionBtn = `<button onclick="sendFriendRequest('${s.id}')" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3 py-1.5 rounded-full transition flex items-center gap-1.5 shadow-md shadow-blue-600/20"><i class="fa-solid fa-user-plus text-[10px]"></i> Solicitar Amistad</button>`;
+                }
+
+                return `
+                    <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <img src="${s.avatar}" class="w-10 h-10 rounded-full object-cover border border-slate-700">
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-100">${s.name}</h4>
+                                <p class="text-[10px] text-slate-400">${s.school}</p>
+                            </div>
+                        </div>
+                        ${actionBtn}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function sendFriendRequest(studentId) {
+            if (!currentUser) return openAuthModal('login');
+            const student = studentDirectory.find(s => s.id === studentId);
+            if (student) {
+                student.friendStatus = 'sent';
+                showToast(`Solicitud enviada a ${student.name}`);
+                filterSearchStudents();
+            }
+        }
+
+        function acceptFriendRequest(studentId) {
+            if (!currentUser) return openAuthModal('login');
+            const student = studentDirectory.find(s => s.id === studentId);
+            if (student) {
+                student.friendStatus = 'accepted';
+                showToast(`¡Ahora eres amigo de ${student.name}!`);
+                renderFriendsAndSearch();
+            }
+        }
+
+        function renderPendingRequests() {
+            const container = document.getElementById('pendingRequestsContainer');
+            const pending = studentDirectory.filter(s => s.friendStatus === 'requested');
+
+            if (pending.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 py-6 text-center">No tienes solicitudes pendientes.</p>`;
+                return;
+            }
+
+            container.innerHTML = pending.map(s => `
+                <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <img src="${s.avatar}" class="w-10 h-10 rounded-full object-cover border border-slate-700">
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-100">${s.name}</h4>
+                            <p class="text-[10px] text-slate-400">${s.school}</p>
+                        </div>
+                    </div>
+                    <button onclick="acceptFriendRequest('${s.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold">Aceptar</button>
+                </div>
+            `).join('');
+        }
+
+        function updatePendingBadges() {
+            const pendingCount = studentDirectory.filter(s => s.friendStatus === 'requested').length;
+            const badgeNav = document.getElementById('pendingBadgeNav');
+            const badgeTab = document.getElementById('pendingBadgeTab');
+
+            if (pendingCount > 0) {
+                badgeNav.innerText = pendingCount;
+                badgeNav.classList.remove('hidden');
+                badgeTab.innerText = pendingCount;
+                badgeTab.classList.remove('hidden');
+            } else {
+                badgeNav.classList.add('hidden');
+                badgeTab.classList.add('hidden');
+            }
+        }
+
+        function selectChatPartner(name, school, avatar) {
+            currentChatPartner = { name, school, avatar };
+            document.getElementById('chatPartnerName').innerText = name;
+            document.getElementById('chatPartnerSchool').innerText = school;
+            document.getElementById('chatPartnerAvatar').src = avatar;
+
+            if (!directMessages[name]) directMessages[name] = [];
+            renderChatMessages();
+            switchMsgTab('chats');
+        }
+
+        function renderChatMessages() {
+            if (!currentChatPartner) return;
+            const container = document.getElementById('chatMessages');
+            const chatLog = directMessages[currentChatPartner.name] || [];
+
+            if (chatLog.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Chat privado con ${currentChatPartner.name}. Envía un mensaje.</div>`;
+                return;
+            }
+
+            const meName = currentUser ? currentUser.name : 'Yo';
+            container.innerHTML = chatLog.map(msg => {
+                const isMe = msg.sender === meName;
+                return `
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                        <div class="max-w-[75%] ${isMe ? 'bg-emerald-600 text-white rounded-2xl rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-2xl rounded-tl-none'} p-3 shadow-md">
+                            ${msg.text ? `<p class="text-xs leading-relaxed">${msg.text}</p>` : ''}
+                            ${msg.media ? `<img src="${msg.media}" class="mt-2 rounded-xl max-h-48 object-cover border border-slate-700/50">` : ''}
+                        </div>
+                        <span class="text-[9px] text-slate-500 mt-1 px-1">${msg.timestamp}</span>
+                    </div>
+                `;
+            }).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleDmImageSelect(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedDmImage = e.target.result;
+                    document.getElementById('dmImagePreviewBadge').classList.remove('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function clearDmImagePreview() {
+            selectedDmImage = null;
+            document.getElementById('dmMediaInput').value = '';
+            document.getElementById('dmImagePreviewBadge').classList.add('hidden');
+        }
+
+        function sendDirectMessage(e) {
+            e.preventDefault();
+            if (!currentUser) return openAuthModal('login');
+            if (!currentChatPartner) return alert("Por favor selecciona un amigo para chatear.");
+
+            const input = document.getElementById('dmInputText');
+            const text = input.value.trim();
+
+            if (!text && !selectedDmImage) return;
+
+            const newMsg = {
+                sender: currentUser.name,
+                text: text,
+                media: selectedDmImage,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            directMessages[currentChatPartner.name].push(newMsg);
+            localStorage.setItem('cte_dms_db', JSON.stringify(directMessages));
+
+            input.value = '';
+            clearDmImagePreview();
+            renderChatMessages();
+        }
+
+        function toggleAnonMode(isAnon) {
+            const title = document.getElementById('anonTitle');
+            const desc = document.getElementById('anonDesc');
+            const icon = document.getElementById('anonIcon');
+
+            if (isAnon) {
+                title.innerText = "Publicar de manera Anónima";
+                desc.innerText = "Tu nombre no se mostrará (Aparecerás como Estudiante Anónimo)";
+                icon.innerHTML = `<i class="fa-solid fa-user-secret text-amber-400"></i>`;
+                icon.classList.add('bg-amber-950');
+            } else {
+                title.innerText = "Publicar con mi nombre";
+                desc.innerText = "Tu nombre y colegio serán visibles públicamente";
+                icon.innerHTML = `<i class="fa-solid fa-user text-emerald-400"></i>`;
+                icon.classList.remove('bg-amber-950');
+            }
+        }
+
+        function previewMediaUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const mediaUrl = e.target.result;
+                const isVideo = file.type.startsWith('video');
+
+                document.getElementById('mediaPlaceholder').classList.add('hidden');
+                document.getElementById('mediaPreviewContainer').classList.remove('hidden');
+
+                const imgPreview = document.getElementById('imagePreview');
+                const videoPreview = document.getElementById('videoPreview');
+
+                if (isVideo) {
+                    imgPreview.classList.add('hidden');
+                    videoPreview.src = mediaUrl;
+                    videoPreview.classList.remove('hidden');
+                    newPostMediaData = { type: 'video', url: mediaUrl };
+                } else {
+                    videoPreview.classList.add('hidden');
+                    imgPreview.src = mediaUrl;
+                    imgPreview.classList.remove('hidden');
+                    newPostMediaData = { type: 'image', url: mediaUrl };
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeMediaPreview() {
+            newPostMediaData = null;
+            document.getElementById('postMediaInput').value = '';
+            document.getElementById('mediaPlaceholder').classList.remove('hidden');
+            document.getElementById('mediaPreviewContainer').classList.add('hidden');
+        }
+
+        function handleCreatePost(e) {
+            e.preventDefault();
+            if (!currentUser) return openAuthModal('login');
+
+            const category = document.getElementById('postCategory').value;
+            const content = document.getElementById('postContent').value.trim();
+            const isAnon = document.getElementById('isAnonymousToggle').checked;
+
+            if (!content) return;
+
+            const newPost = {
+                id: 'post_' + Date.now(),
+                authorName: isAnon ? "Estudiante Anónimo" : currentUser.name,
+                authorSchool: currentUser.school,
+                authorAvatar: isAnon ? "https://placehold.co/100x100/334155/cbd5e1?text=🔒" : currentUser.avatar,
+                ownerId: currentUser.email,
+                isAnonymous: isAnon,
+                category: category,
+                content: content,
+                media: newPostMediaData,
+                timestamp: 'Hace un momento',
+                likes: 0,
+                likedBy: [],
+                shares: 0,
+                sharedBy: [],
+                comments: []
+            };
+
+            posts.unshift(newPost);
+            localStorage.setItem('cte_posts_db', JSON.stringify(posts));
+
+            document.getElementById('createPostForm').reset();
+            removeMediaPreview();
+            toggleAnonMode(false);
+
+            showToast("Publicación compartida en CTE");
+            navTo('feed');
+        }
+
+        function filterPosts(cat, event) {
+            currentFilter = cat;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/40');
+                btn.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/40');
+            }
+            renderPosts();
+        }
+
+        function renderPosts() {
+            const container = document.getElementById('postsList');
+            const emptyMsg = document.getElementById('emptyFeedMessage');
+
+            const filtered = currentFilter === 'todos' 
+                ? posts 
+                : posts.filter(p => p.category === currentFilter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                container.appendChild(emptyMsg);
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+            container.innerHTML = filtered.map(post => renderPostHTML(post)).join('');
+        }
+
+        function renderPostHTML(post) {
+            const activeUserKey = currentUser ? currentUser.email : 'guest';
+            const isLiked = post.likedBy && post.likedBy.includes(activeUserKey);
+            const isShared = post.sharedBy && post.sharedBy.includes(activeUserKey);
+
+            let mediaHTML = '';
+            if (post.media) {
+                if (post.media.type === 'video') {
+                    mediaHTML = `<div class="mt-3 rounded-2xl overflow-hidden bg-black max-h-96">
+                        <video src="${post.media.url}" controls class="w-full max-h-96 object-contain"></video>
+                    </div>`;
+                } else {
+                    mediaHTML = `<div class="mt-3 rounded-2xl overflow-hidden bg-slate-900 max-h-96 border border-slate-800">
+                        <img src="${post.media.url}" class="w-full max-h-96 object-cover hover:scale-105 transition duration-300">
+                    </div>`;
+                }
+            }
+
+            const commentsCount = post.comments ? post.comments.length : 0;
+
+            const commentsHTML = (post.comments || []).map((c, idx) => {
+                const canDelete = currentUser && (c.ownerEmail === currentUser.email || post.ownerId === currentUser.email);
+                return `
+                    <div class="flex gap-2.5 items-start text-xs bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80">
+                        <img src="${c.avatar}" class="w-6 h-6 rounded-full object-cover mt-0.5">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="font-semibold text-slate-200">${c.author}</span>
+                                    <span class="text-[10px] text-slate-500 ml-1.5">${c.school}</span>
+                                </div>
+                                ${canDelete ? `
+                                    <button onclick="deleteComment('${post.id}', ${idx})" class="text-slate-500 hover:text-red-400 text-[10px] transition" title="Eliminar">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                            <p class="text-slate-300 mt-0.5 leading-relaxed">${c.text}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <article class="p-4 hover:bg-slate-900/30 transition border-b border-slate-800/60 space-y-3">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-3">
+                            <img src="${post.authorAvatar}" class="w-10 h-10 rounded-full object-cover border border-slate-700">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-sm text-slate-100">${post.authorName}</h4>
+                                    ${post.isAnonymous ? '<span class="bg-amber-950 text-amber-400 border border-amber-800 text-[10px] px-1.5 py-0.2 rounded font-mono">ANÓNIMO</span>' : ''}
+                                </div>
+                                <p class="text-xs text-slate-400">${post.authorSchool} • <span class="text-slate-500">${post.timestamp}</span></p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] uppercase tracking-wider font-semibold px-2 py-1 bg-slate-800 text-slate-300 rounded-lg">
+                            ${post.category}
+                        </span>
+                    </div>
+
+                    <p class="text-sm text-slate-200 leading-relaxed whitespace-pre-line">${post.content}</p>
+
+                    ${mediaHTML}
+
+                    <!-- Post Bar -->
+                    <div class="flex items-center justify-between pt-2 text-xs text-slate-400 border-t border-slate-800/40">
+                        <button onclick="toggleLike('${post.id}')" class="flex items-center gap-1.5 hover:text-red-400 transition ${isLiked ? 'text-red-500 font-bold' : ''}">
+                            <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart text-base"></i>
+                            <span>${post.likes}</span>
+                        </button>
+
+                        <button onclick="toggleCommentBox('${post.id}')" class="flex items-center gap-1.5 hover:text-blue-400 transition">
+                            <i class="fa-regular fa-comment text-base"></i>
+                            <span>${commentsCount}</span>
+                        </button>
+
+                        <button onclick="toggleShare('${post.id}')" class="flex items-center gap-1.5 hover:text-emerald-400 transition ${isShared ? 'text-emerald-400 font-bold' : ''}">
+                            <i class="fa-solid fa-repeat text-base"></i>
+                            <span>${post.shares}</span>
+                        </button>
+                    </div>
+
+                    <!-- Comment Box -->
+                    <div id="commentsBox_${post.id}" class="hidden pt-3 border-t border-slate-800/60 space-y-3">
+                        <div class="space-y-2">
+                            ${commentsHTML.length > 0 ? commentsHTML : '<p class="text-[11px] text-slate-500 italic py-1">Sé el primero en opinar sobre esta publicación.</p>'}
+                        </div>
+                        <form onsubmit="handleAddComment(event, '${post.id}')" class="flex gap-2 pt-1">
+                            <input type="text" placeholder="${currentUser ? 'Escribe un comentario...' : 'Inicia sesión para comentar'}" required class="flex-1 bg-slate-900 border border-slate-700 rounded-full px-3.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+                            <button type="submit" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-semibold">Comentar</button>
+                        </form>
+                    </div>
+                </article>
+            `;
+        }
+
+        function toggleLike(postId) {
+            if (!currentUser) return openAuthModal('login');
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+
+            if (!post.likedBy) post.likedBy = [];
+            const idx = post.likedBy.indexOf(currentUser.email);
+
+            if (idx === -1) {
+                post.likedBy.push(currentUser.email);
+                post.likes += 1;
+            } else {
+                post.likedBy.splice(idx, 1);
+                post.likes = Math.max(0, post.likes - 1);
+            }
+            localStorage.setItem('cte_posts_db', JSON.stringify(posts));
+            renderPosts();
+        }
+
+        function toggleShare(postId) {
+            if (!currentUser) return openAuthModal('login');
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+
+            if (!post.sharedBy) post.sharedBy = [];
+            const idx = post.sharedBy.indexOf(currentUser.email);
+
+            if (idx === -1) {
+                post.sharedBy.push(currentUser.email);
+                post.shares += 1;
+                showToast("Publicación compartida en tu perfil");
+            } else {
+                post.sharedBy.splice(idx, 1);
+                post.shares = Math.max(0, post.shares - 1);
+                showToast("Se quitó de tus compartidos");
+            }
+            localStorage.setItem('cte_posts_db', JSON.stringify(posts));
+            renderPosts();
+        }
+
+        function toggleCommentBox(postId) {
+            const box = document.getElementById(`commentsBox_${postId}`);
+            if (box) box.classList.toggle('hidden');
+        }
+
+        function handleAddComment(e, postId) {
+            e.preventDefault();
+            if (!currentUser) return openAuthModal('login');
+
+            const input = e.target.querySelector('input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                if (!post.comments) post.comments = [];
+                post.comments.push({
+                    ownerEmail: currentUser.email,
+                    author: currentUser.name,
+                    school: currentUser.school,
+                    avatar: currentUser.avatar,
+                    text: text
+                });
+                localStorage.setItem('cte_posts_db', JSON.stringify(posts));
+                renderPosts();
+                showToast("Comentario agregado");
+            }
+        }
+
+        function deleteComment(postId, commentIndex) {
+            const post = posts.find(p => p.id === postId);
+            if (post && post.comments && post.comments[commentIndex]) {
+                post.comments.splice(commentIndex, 1);
+                localStorage.setItem('cte_posts_db', JSON.stringify(posts));
+                renderPosts();
+                showToast("Comentario eliminado");
+            }
+        }
+
+        function switchProfileTab(tab) {
+            activeProfileTab = tab;
+            document.querySelectorAll('.prof-tab').forEach(b => {
+                b.classList.remove('text-emerald-400', 'border-emerald-500');
+                b.classList.add('text-slate-400', 'border-transparent');
+            });
+
+            const activeBtn = document.getElementById(`tab-btn-${tab}`);
+            if (activeBtn) {
+                activeBtn.classList.add('text-emerald-400', 'border-emerald-500');
+            }
+
+            renderProfileTab();
+        }
+
+        function renderProfileTab() {
+            const container = document.getElementById('profileTabContent');
+            if (!currentUser) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <p class="text-slate-400 text-xs mb-3">Inicia sesión para gestionar tu perfil y denuncias anónimas</p>
+                        <button onclick="openAuthModal('login')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-semibold">Iniciar Sesión</button>
+                    </div>
+                `;
+                return;
+            }
+
+            if (activeProfileTab === 'posts') {
+                const userPosts = posts.filter(p => p.ownerId === currentUser.email && !p.isAnonymous);
+                if (userPosts.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">No has publicado denuncias públicas aún.</p>`;
+                } else {
+                    container.innerHTML = userPosts.map(p => renderPostHTML(p)).join('');
+                }
+            } else if (activeProfileTab === 'shares') {
+                const shared = posts.filter(p => p.sharedBy && p.sharedBy.includes(currentUser.email));
+                if (shared.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">No has compartido publicaciones.</p>`;
+                } else {
+                    container.innerHTML = shared.map(p => renderPostHTML(p)).join('');
+                }
+            } else if (activeProfileTab === 'anon') {
+                const anonPosts = posts.filter(p => p.ownerId === currentUser.email && p.isAnonymous);
+                
+                let anonHTML = `
+                    <div class="mb-4 p-3 bg-amber-950/40 border border-amber-800/60 rounded-xl text-xs text-amber-200 flex items-center gap-2">
+                        <i class="fa-solid fa-lock text-amber-400 text-base"></i>
+                        <span><strong>Sección Confidencial:</strong> Solo tú puedes ver este historial privado de tus denuncias anónimas. Tu correo está 100% oculto.</span>
+                    </div>
+                `;
+
+                if (anonPosts.length === 0) {
+                    anonHTML += `<p class="text-xs text-slate-500 text-center py-8">No has publicado denuncias anónimas.</p>`;
+                } else {
+                    anonHTML += anonPosts.map(p => renderPostHTML(p)).join('');
+                }
+
+                container.innerHTML = anonHTML;
+            }
+        }
+
+        function triggerProfilePictureUpload() {
+            if (!currentUser) return openAuthModal('login');
+            document.getElementById('profileImageFileInput').click();
+        }
+
+        function handleProfilePictureChange(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentUser.avatar = e.target.result;
+                    
+                    const users = AuthDatabase.getUsers();
+                    if (users[currentUser.email]) {
+                        users[currentUser.email].avatar = e.target.result;
+                        AuthDatabase.saveUsers(users);
+                    }
+                    AuthDatabase.setCurrentSession(currentUser);
+
+                    updateUserProfileUI();
+                    showToast("Foto de perfil actualizada");
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>
